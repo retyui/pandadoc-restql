@@ -16,22 +16,22 @@ export const WorkspacePropertiesTC = schemaComposer.createObjectTC({
 });
 
 export const CRMTypesTC = schemaComposer.createEnumTC({
-  name: "CRMTypes",
+  name: "CrmTypes",
   values: {
-    Salesforce: { value: "Salesforce" },
-    Sugar: { value: "Sugar" },
-    MicrosoftDynamics: { value: "Microsoft Dynamics" },
-    FreshsalesCRM: { value: "Freshsales CRM" },
-    Nutshell: { value: "Nutshell" },
-    Base: { value: "Base" },
-    HubSpotCRM: { value: "HubSpot CRM" },
-    Pipedrive: { value: "Pipedrive" },
-    Zoho: { value: "Zoho" },
-    ProsperWorks: { value: "ProsperWorks" },
-    Insightly: { value: "Insightly" },
-    Other: { value: "Other" },
-    StillLookingForACRM: { value: "Still looking for a CRM" },
-    DoNotNaveACRM: { value: "Don't have a CRM" },
+    SALESFORCE: { value: "Salesforce" },
+    SUGAR: { value: "Sugar" },
+    MICROSOFT_DYNAMICS: { value: "Microsoft Dynamics" },
+    FRESHSALES_CRM: { value: "Freshsales CRM" },
+    NUTSHELL: { value: "Nutshell" },
+    BASE: { value: "Base" },
+    HUBSPOT_CRM: { value: "HubSpot CRM" },
+    PIPEDRIVE: { value: "Pipedrive" },
+    ZOHO: { value: "Zoho" },
+    PROSPER_WORKS: { value: "ProsperWorks" },
+    INSIGHTLY: { value: "Insightly" },
+    OTHER: { value: "Other" },
+    STILL_LOOKING_FOR_CRM: { value: "Still looking for a CRM" },
+    DO_NOT_HAVE_CRM: { value: "Don\\'t have a CRM" },
   },
 });
 
@@ -118,6 +118,6 @@ export const PropertiesTC = schemaComposer.createObjectTC({
   fields: {
     user: UserPropertiesTC,
     organization: OrganizationPropertiesTC,
-    workspace: WorkspacePropertiesTC,
+    // workspace: WorkspacePropertiesTC,
   },
 });

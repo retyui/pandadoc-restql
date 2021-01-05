@@ -1,0 +1,337 @@
+# for PandaDoc with ❤️
+type Query {
+  #
+  # Request URL: https://api.pandadoc.com/contacts/<contactId>
+  #
+  contact(id: UserID!): Contact
+
+  #
+  # Request URL: https://api.pandadoc.com/org/<organizationId>/ws/<workspaceId>/documents/<documentId>/
+  #
+  document(organizationId: OrganizationID!, workspaceId: WorkspaceID!, documentId: DocumentID!): Document
+
+  #
+  # Request URL: https://api.pandadoc.com/org/<organizationId>/ws/<workspaceId>/documents/<documentId>/info
+  #
+  documentInfo(organizationId: OrganizationID!, workspaceId: WorkspaceID!, documentId: DocumentID!): DocumentInfo
+
+  #
+  # Request URL: https://api.pandadoc.com/folders/<folderId>/
+  #
+  folder(id: FolderID!): Folder
+
+  #
+  # Request URL: https://api.pandadoc.com/folders/<folderId>/tree
+  #   
+  # List of folders from the root folder to this folder
+  #
+  # If you try get 'folder3' you will get:
+  #
+  # [{id:'root_id'}, {id:'folder2_id'}, {id:'folder3_id'}]
+  #
+  #
+  # root
+  # ├── folder1
+  # ├── folder2
+  # │   ├── folder3
+  #
+  folderTree(id: FolderID!): [Folder!]
+
+  #
+  # Request URL: https://api.pandadoc.com/profile
+  #
+  profile: Profile
+
+  #
+  # Request URL: https://api.pandadoc.com/properties
+  #
+  properties: Properties
+
+  #
+  # Request URL: https://api.pandadoc.com/org/<organizationId>/ws/<workspaceId>/
+  #
+  workspace(workspaceId: WorkspaceID!, organizationId: OrganizationID!): Workspace
+}
+
+type Contact {
+  id: UserID!
+  email: String!
+  is_internal: Boolean!
+  removed: Boolean!
+
+  # Url to profile image (example: 'https://pd-staging-media.s3.us-west-2.amazonaws.com:443/users/G7joiw7DcRQ46yhM53uq2Q/avatar-200x200.jpg')
+  avatar: String
+  city: String
+  company: String
+  country: String
+  first_name: String
+  last_name: String
+  notes: String
+  phone: String
+  postal_code: String
+  state: String
+  street_address: String
+  title: String
+}
+
+scalar UserID
+
+type Document {
+  id: DocumentID!
+  name: String!
+  status: DocumentStatus!
+  type: DocumentType!
+  version: Int!
+  organization: OrganizationID!
+  workspace: WorkspaceID!
+  owner: User!
+  folder: Folder!
+  removed: Boolean!
+  revision_number: Int!
+  sample: Boolean!
+  silent: Boolean!
+}
+
+scalar DocumentID
+
+enum DocumentStatus {
+  DRAFT
+  SENT
+  COMPLETED
+  VIEWED
+  WAITING_APPROVAL
+  APPROVED
+  REJECTED
+  WAITING_FOR_PAYMENT
+  PAID
+  EXPIRED
+  DECLINED
+  UNDEFINED
+}
+
+enum DocumentType {
+  DOCUMENT
+  TEMPLATE
+  EDITABLE_DOCUMENT
+  EDITABLE_TEMPLATE
+  LIBRARY_ITEM
+}
+
+scalar OrganizationID
+
+scalar WorkspaceID
+
+type User {
+  id: UserID!
+  email: String!
+  first_name: String!
+  last_name: String!
+  phone_number: String!
+
+  # Url to profile image (example: 'https://pd-staging-media.s3.us-west-2.amazonaws.com:443/users/G7joiw7DcRQ46yhM53uq2Q/avatar-200x200.jpg')
+  avatar: String
+  iid: Int!
+
+  # Checks whether that user has no active workspace
+  is_suspended: Boolean!
+
+  # (example: "login")
+  signup_source: String!
+}
+
+type Folder {
+  id: FolderID!
+  name: String!
+  date_created: Date!
+  date_modified: Date!
+  owner: User!
+  modified_by: User!
+  parent: FolderID
+  workspace: WorkspaceID!
+
+  # No idea what is it!
+  type: Int!
+
+  # List of folders from the root folder to this folder
+  #
+  # If you try get 'folder3' you will get:
+  #
+  # [{id:'root_id'}, {id:'folder2_id'}, {id:'folder3_id'}]
+  #
+  #
+  # root
+  # ├── folder1
+  # ├── folder2
+  # │   ├── folder3
+  #
+  tree: [Folder!]!
+}
+
+scalar FolderID
+
+scalar Date
+
+type DocumentInfo {
+  id: DocumentID!
+  status: DocumentStatus!
+  type: DocumentType!
+  version: Int!
+  owner: DocumentInfoOwner!
+}
+
+type DocumentInfoOwner {
+  id: UserID
+}
+
+type Profile {
+  id: String!
+  iid: Int!
+  signature: Signature
+
+  # Url to profile image (example: 'https://pd-staging-media.s3.us-west-2.amazonaws.com:443/users/G7joiw7DcRQ46yhM53uq2Q/avatar-200x200.jpg')
+  avatar: String
+
+  # e-mail address 'test@example.com'
+  email: String!
+
+  # Checks whether that user has no active workspace
+  is_suspended: Boolean!
+  first_name: String!
+  last_name: String!
+
+  # Any phone number no restrictions (example: "0", "14845101364")
+  phone_number: String!
+
+  # (example: "login")
+  signup_source: String!
+  company_name: String @deprecated(reason: "Always will be returned 'null' (More info: https://pandadoc.atlassian.net/browse/PD-7736)")
+  company_size: CompanySize @deprecated(reason: "Always will be returned 'null' (More info: https://pandadoc.atlassian.net/browse/PD-7736)")
+  is_organization_owner: Boolean!
+  is_organization_admin: Boolean!
+  email_verified: Boolean!
+  date_registered: Date!
+  date_joined: Date!
+  org_date_created: Date
+
+  # (example: "Full")
+  license: String!
+  workspace: WorkspaceID!
+
+  # TODO: Not sure that is UserID
+  actor: UserID!
+}
+
+type Signature {
+  # Encode image data
+  data: String!
+
+  # Image format (example: "image/png;base64")
+  dataFormat: String!
+}
+
+enum CompanySize {
+  Solo
+  FROM_2_TO_10
+  FROM_11_TO_50
+  FROM_51_TO_200
+  FROM_201_TO_500
+  FROM_501_TO_1000
+  FROM_1001_AND_MORE
+}
+
+# Request URL: https://api.pandadoc.com/properties
+type Properties {
+  user: UserProperties
+  organization: OrganizationProperties
+}
+
+type UserProperties {
+  # Unix timestamp (example: '1588852018197')
+  proactive_chat_billing_last_time_triggered: String!
+
+  # User booking a product demo status
+  book_a_demo_state: BookDemoStates!
+
+  # Number of onboarding dialog shows (example: '0', '1')
+  new_onboarding_shown_times: String!
+
+  # TimeZone offset (example: Europe/Minsk)
+  raw_timezone: String!
+
+  # Number timezone offset (example: +03)
+  timezone: String!
+
+  # (example: Minsk)
+  city: String!
+
+  # Country region (example: Minsk City)
+  region: String!
+
+  # Full country name (example: Belarus, Poland...)
+  country: String!
+
+  # Short country code (example: US, BY, Pl...)
+  country_code: String!
+}
+
+enum BookDemoStates {
+  NOT_SET
+  PANEL_ACTIVE
+  PANEL_HIDDEN
+  USED
+}
+
+type OrganizationProperties {
+  job_role: String!
+  company_name: String!
+  company_size: CompanySize!
+  industry: String!
+  crm: CRMTypes!
+  what_brought_you_to_pandadoc: String!
+  phone: String!
+  google_analytics_client_id: String!
+  device: String!
+  a_b_test_info: String!
+  country_ab: String!
+  hubspot_form_guid: String!
+  sfdc_campaign_id: String!
+  hs_analytics_first_url: String!
+}
+
+enum CRMTypes {
+  Salesforce
+  Sugar
+  MicrosoftDynamics
+  FreshsalesCRM
+  Nutshell
+  Base
+  HubSpotCRM
+  Pipedrive
+  Zoho
+  ProsperWorks
+  Insightly
+  Other
+  StillLookingForACRM
+  DoNotNaveACRM
+}
+
+type Workspace {
+  id: WorkspaceID!
+  organization: OrganizationID!
+  owner: User!
+  date_created: Date!
+  date_updated: Date
+  editor_mode: EditorMode!
+  active_members_count: Int!
+  invited_members_count: Int!
+  new_editor_available: Boolean!
+  name: String!
+  features: [Int!]!
+  members: [UserID!]!
+}
+
+enum EditorMode {
+  EV1
+  EV2
+  EV1_EV2
+}

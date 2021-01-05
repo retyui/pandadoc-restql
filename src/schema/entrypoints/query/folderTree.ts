@@ -4,7 +4,7 @@ import { FolderTC } from "../../entities/FolderTC";
 import { FolderID } from "../../types/Scalars";
 
 export default {
-  type: FolderTC.NonNull.List.NonNull,
+  type: FolderTC.NonNull.List,
   args: {
     id: FolderID.NonNull,
   },
