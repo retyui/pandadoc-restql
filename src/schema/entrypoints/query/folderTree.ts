@@ -26,4 +26,6 @@ root
 ├── folder2
 │   ├── folder3
 `,
-} as FieldConfig;
+} as FieldConfig<{
+  id: string;
+}>;

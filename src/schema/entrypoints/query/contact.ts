@@ -13,4 +13,6 @@ Request URL: https://api.pandadoc.com/contacts/<contactId>
 `,
   resolve: (_, args, { axios }) =>
     getContactById(axios, { contactId: args.id }),
-} as FieldConfig;
+} as FieldConfig<{
+  id: string;
+}>;

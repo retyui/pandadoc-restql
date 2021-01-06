@@ -26,4 +26,7 @@ Request URL: https://api.pandadoc.com/org/<organizationId>/ws/<workspaceId>/
 
       return workspace;
     }),
-} as FieldConfig;
+} as FieldConfig<{
+  organizationId: string;
+  workspaceId: string;
+}>;

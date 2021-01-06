@@ -1,12 +1,16 @@
 import { schemaComposer } from "graphql-compose";
 import {
   DocumentID,
+  DocumentTotalValueJSON,
+  FIXME,
   OrganizationID,
   UserID,
   WorkspaceID,
 } from "../types/Scalars";
 import { UserTC } from "./UserTD";
 import { FolderTC } from "./FolderTC";
+import { pick } from "../../utils/pick";
+import { FullDocRecipientTC, RecipientTC } from "./RecipientTC";
 
 export const DocumentStatusTC = schemaComposer.createEnumTC({
   name: "DocumentStatus",
@@ -44,34 +48,118 @@ export const DocumentInfoOwnerTC = schemaComposer.createObjectTC({
   },
 });
 
+export const DocumentTotalTC = schemaComposer.createObjectTC({
+  name: "DocumentTotal",
+  fields: {
+    type: "Int!", // FIXME: Add description or use Enum
+    value: DocumentTotalValueJSON,
+  },
+});
+
+export const DocumentRenewalTC = schemaComposer.createObjectTC({
+  name: "DocumentRenewal",
+  fields: {
+    enabled: "Boolean!",
+    renewal_date: "Date",
+  },
+});
+
+const COMMON_FIELDS = {
+  // YOU WILL BE FIRED IF CHANGE NEXT PROPERTIES
+  id: DocumentID.NonNull,
+  status: DocumentStatusTC.NonNull,
+  type: DocumentTypeTC.NonNull,
+  version: "Int!", // FIXME
+  name: "String!",
+  removed: "Boolean!",
+  owner: UserTC.NonNull,
+  has_ordering: "Boolean!",
+  has_payment: "Boolean!",
+  date_completed: "Date",
+  date_created: "Date!",
+  date_declined: "Date",
+  date_expiration: "Date",
+  date_modified: "Date!",
+  date_sent: "Date",
+  date_status_changed: "Date!",
+  renewal: DocumentRenewalTC,
+  total: DocumentTotalTC.NonNull,
+};
+
 export const DocumentInfoTC = schemaComposer.createObjectTC({
   name: "DocumentInfo",
   fields: {
-    id: DocumentID.NonNull,
-    status: DocumentStatusTC.NonNull,
-    type: DocumentTypeTC.NonNull,
-    version: "Int!", // FIXME
+    ...pick(COMMON_FIELDS, [
+      //
+      "id",
+      "status",
+      "type",
+      "version",
+    ]),
     owner: DocumentInfoOwnerTC.NonNull,
-    // FIXME
-    // redlining: null,
+    redlining: FIXME, // FIXME
   },
 });
 
 export const DocumentTC = schemaComposer.createObjectTC({
   name: "Document",
   fields: {
-    id: DocumentID.NonNull,
-    name: "String!",
-    status: DocumentStatusTC.NonNull,
-    type: DocumentTypeTC.NonNull,
-    version: "Int!", // FIXME
+    ...pick(COMMON_FIELDS, [
+      "id",
+      "date_completed",
+      "date_created",
+      "date_declined",
+      "date_expiration",
+      "date_modified",
+      "date_sent",
+      "date_status_changed",
+      "has_ordering",
+      "name",
+      "owner",
+      "removed",
+      "renewal",
+      "status",
+      "total",
+      "type",
+      "version",
+    ]),
     organization: OrganizationID.NonNull,
     workspace: WorkspaceID.NonNull,
-    owner: UserTC.NonNull,
     folder: FolderTC.NonNull,
-    removed: "Boolean!",
     revision_number: "Int!",
     sample: "Boolean!",
     silent: "Boolean!",
+    recipients: FullDocRecipientTC.NonNull.List.NonNull,
+  },
+});
+
+export const ContactDocumentTC = schemaComposer.createObjectTC({
+  name: "ContactDocument",
+  fields: {
+    ...pick(COMMON_FIELDS, [
+      "id",
+      "date_completed",
+      "date_created",
+      "date_declined",
+      "date_expiration",
+      "date_modified",
+      "date_sent",
+      "date_status_changed",
+      "has_ordering",
+      "has_payment",
+      "name",
+      "owner",
+      "removed",
+      "renewal",
+      "status",
+      "total",
+      "type",
+      "version",
+    ]),
+    // FIXME: Add strong types
+    approval_execution: FIXME,
+    autonumbering_sequence_name: FIXME,
+    recipients: RecipientTC.NonNull.List.NonNull,
+    tags: FIXME,
   },
 });

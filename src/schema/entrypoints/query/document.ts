@@ -19,4 +19,8 @@ Request URL: https://api.pandadoc.com/org/<organizationId>/ws/<workspaceId>/docu
       workspaceId: args.workspaceId,
       documentId: args.documentId,
     }),
-} as FieldConfig;
+} as FieldConfig<{
+  organizationId: string;
+  workspaceId: string;
+  documentId: string;
+}>;

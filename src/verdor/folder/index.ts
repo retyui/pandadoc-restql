@@ -1,20 +1,30 @@
 import { AxiosInstance } from "axios";
 import { parseFolder } from "./serializer";
+import { createParamsValidator, InferParamsType } from "../params";
+import * as yup from "yup";
 
-export const getFolderById = (
-  axios: AxiosInstance,
-  { folderId }: { folderId: string }
-) =>
-  axios
-    .get(`/folders/${folderId}/`)
-    .then((res) => res?.data)
-    .then(parseFolder);
+const validateParams = createParamsValidator(
+  yup.object().shape({
+    folderId: yup.string().required(),
+  })
+);
 
-export const getFolderTreeById = (
+export async function getFolderById(
   axios: AxiosInstance,
-  { folderId }: { folderId: string }
-) =>
-  axios
-    .get(`/folders/${folderId}/tree`)
-    .then((res) => res?.data)
-    .then((folders) => folders.map(parseFolder));
+  params: InferParamsType<typeof validateParams>
+) {
+  const { folderId } = await validateParams(params);
+  const { data: folder } = await axios.get(`/folders/${folderId}/`);
+
+  return parseFolder(folder);
+}
+
+export async function getFolderTreeById(
+  axios: AxiosInstance,
+  params: InferParamsType<typeof validateParams>
+) {
+  const { folderId } = await validateParams(params);
+  const { data: folders } = await axios.get(`/folders/${folderId}/tree`);
+
+  return folders.map(parseFolder);
+}

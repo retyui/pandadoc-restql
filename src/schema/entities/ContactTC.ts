@@ -1,25 +1,25 @@
 import { schemaComposer } from "graphql-compose";
-import { UserID } from "../types/Scalars";
+import { ContactID, Email, ImageUrl, PhoneNumber } from "../types/Scalars";
+
+export const COMMON_CONTACT_FIELDS = {
+  id: ContactID.NonNull,
+  avatar: ImageUrl,
+  email: Email.NonNull,
+  first_name: "String",
+  last_name: "String",
+};
 
 export const ContactTC = schemaComposer.createObjectTC({
   name: "Contact",
   fields: {
-    id: { type: UserID.NonNull },
-    email: "String!",
+    ...COMMON_CONTACT_FIELDS,
     is_internal: "Boolean!",
     removed: "Boolean!",
-    avatar: {
-      type: "String",
-      description:
-        "Url to profile image (example: 'https://pd-staging-media.s3.us-west-2.amazonaws.com:443/users/G7joiw7DcRQ46yhM53uq2Q/avatar-200x200.jpg')",
-    },
     city: "String",
     company: "String",
     country: "String",
-    first_name: "String",
-    last_name: "String",
     notes: "String",
-    phone: "String",
+    phone: PhoneNumber,
     postal_code: "String",
     state: "String",
     street_address: "String",

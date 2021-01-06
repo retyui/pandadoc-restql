@@ -12,12 +12,57 @@ export interface Scalars {
   /** The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1. */
   Int: number;
   Float: number;
-  UserID: any;
-  DocumentID: any;
-  OrganizationID: any;
-  WorkspaceID: any;
-  FolderID: any;
+  ContactID: string;
+  /** Url to image (example: 'https://s3.amazonaws.com/test.jpg') */
+  ImageUrl: string;
+  /** e-mail address (exmaple: 'test@example.com') */
+  Email: string;
+  /** Any phone number no restrictions (example: "0", "14845101364") */
+  PhoneNumber: string;
+  UserID: string;
+  DocumentID: string;
   Date: any;
+  /** Record<Currencies, string>  (example  { USD: "0" }) */
+  DocumentTotalValueJSON: Record<Scalars["Currencies"], string>;
+  OrganizationID: string;
+  WorkspaceID: string;
+  FolderID: string;
+  FieldID: string;
+  /** I DO NOT KNOW WHAT TYPE HERE SHOULD BE (( */
+  FIXME: any;
+  TreatmentsJSON: { [featureName: string]: "control" | "on" | "off" };
+  /** Color value (#ffffff) */
+  CssColor: string;
+  /**
+   * interface CurrencyFormatsJSON {
+   *   [code: Currencies]: {
+   *     code: Currencies;
+   *     decimal: string;
+   *     format: string;
+   *     name: string;
+   *     negativeFormat: string;
+   *     pluralName: string;
+   *     precision: number;
+   *     symbol: string;
+   *     thousand: string;
+   *   };
+   * };
+   */
+  CurrencyFormatsJSON: Record<Scalars["Currencies"], {
+    code: Scalars["Currencies"];
+    decimal: string;
+    format: string;
+    name: string;
+    negativeFormat: string;
+    pluralName: string;
+    precision: number;
+    symbol: string;
+    thousand: string;
+  }>;
+  DateFormatsJSON: Record<DateFormats, string>;
+  /** "USD" | "BYN"| "EUR" | ... */
+  Currencies: 'AED' |  'AFN' |  'ALL' |  'AMD' |  'AOA' |  'ARS' |  'AUD' |  'AWG' |  'AZN' |  'BAM' |  'BBD' |  'BDT' |  'BGN' |  'BHD' |  'BIF' |  'BMD' |  'BND' |  'BOB' |  'BRL' |  'BWP' |  'BYN' |  'BYR' |  'BZD' |  'CAD' |  'CDF' |  'CHF' |  'CLP' |  'CNY' |  'COP' |  'CRC' |  'CUC' |  'CVE' |  'CZK' |  'DJF' |  'DKK' |  'DOP' |  'DZD' |  'EGP' |  'ERN' |  'ETB' |  'EUR' |  'FJD' |  'GBP' |  'GEL' |  'GHS' |  'GNF' |  'GTQ' |  'GYD' |  'HKD' |  'HNL' |  'HRK' |  'HUF' |  'IDR' |  'ILS' |  'INR' |  'IQD' |  'IRR' |  'ISK' |  'JMD' |  'JOD' |  'JPY' |  'KES' |  'KHR' |  'KMF' |  'KRW' |  'KWD' |  'KZT' |  'LBP' |  'LKR' |  'LRD' |  'LTL' |  'LVL' |  'LYD' |  'MAD' |  'MDL' |  'MGA' |  'MKD' |  'MMK' |  'MOP' |  'MUR' |  'MXN' |  'MYR' |  'MZN' |  'NAD' |  'NGN' |  'NIO' |  'NOK' |  'NPR' |  'NZD' |  'OMR' |  'PAB' |  'PEN' |  'PGK' |  'PHP' |  'PKR' |  'PLN' |  'PYG' |  'QAR' |  'RON' |  'RSD' |  'RUB' |  'RWF' |  'SAR' |  'SDG' |  'SEK' |  'SGD' |  'SOS' |  'STD' |  'SYP' |  'THB' |  'TND' |  'TOP' |  'TRY' |  'TTD' |  'TWD' |  'TZS' |  'UAH' |  'UF' |  'UGX' |  'USD' |  'UYU' |  'UZS' |  'VEF' |  'VND' |  'XAF' |  'XOF' |  'YER' |  'ZAR' |  'ZMK';
+  ThemeID: any;
 }
 
 /** for PandaDoc with ❤️ */
@@ -29,6 +74,8 @@ export interface Query {
   document?: Maybe<Document>;
   /** Request URL: https://api.pandadoc.com/org/<organizationId>/ws/<workspaceId>/documents/<documentId>/info */
   documentInfo?: Maybe<DocumentInfo>;
+  /** Request URL: https://api.pandadoc.com/contacts/<ContactId>/documents */
+  documentsByContactsId?: Maybe<Array<ContactDocument>>;
   /** Request URL: https://api.pandadoc.com/folders/<folderId>/ */
   folder?: Maybe<Folder>;
   /**
@@ -51,6 +98,8 @@ export interface Query {
   profile?: Maybe<Profile>;
   /** Request URL: https://api.pandadoc.com/properties */
   properties?: Maybe<Properties>;
+  /** Request URL: https://api.pandadoc.com/users/treatments */
+  treatments?: Maybe<Scalars['TreatmentsJSON']>;
   /** Request URL: https://api.pandadoc.com/org/<organizationId>/ws/<workspaceId>/ */
   workspace?: Maybe<Workspace>;
 }
@@ -79,6 +128,15 @@ export interface QueryDocumentInfoArgs {
 
 
 /** for PandaDoc with ❤️ */
+export interface QueryDocumentsByContactsIdArgs {
+  contactId: Scalars['UserID'];
+  page?: Maybe<Scalars['Int']>;
+  count?: Maybe<Scalars['Int']>;
+  statusNe?: Maybe<DocumentStatus>;
+}
+
+
+/** for PandaDoc with ❤️ */
 export interface QueryFolderArgs {
   id: Scalars['FolderID'];
 }
@@ -91,6 +149,12 @@ export interface QueryFolderTreeArgs {
 
 
 /** for PandaDoc with ❤️ */
+export interface QueryTreatmentsArgs {
+  features: Array<Scalars['String']>;
+}
+
+
+/** for PandaDoc with ❤️ */
 export interface QueryWorkspaceArgs {
   workspaceId: Scalars['WorkspaceID'];
   organizationId: Scalars['OrganizationID'];
@@ -98,19 +162,18 @@ export interface QueryWorkspaceArgs {
 
 export interface Contact {
   __typename?: 'Contact';
-  id: Scalars['UserID'];
-  email: Scalars['String'];
+  id: Scalars['ContactID'];
+  avatar?: Maybe<Scalars['ImageUrl']>;
+  email: Scalars['Email'];
+  first_name?: Maybe<Scalars['String']>;
+  last_name?: Maybe<Scalars['String']>;
   is_internal: Scalars['Boolean'];
   removed: Scalars['Boolean'];
-  /** Url to profile image (example: 'https://pd-staging-media.s3.us-west-2.amazonaws.com:443/users/G7joiw7DcRQ46yhM53uq2Q/avatar-200x200.jpg') */
-  avatar?: Maybe<Scalars['String']>;
   city?: Maybe<Scalars['String']>;
   company?: Maybe<Scalars['String']>;
   country?: Maybe<Scalars['String']>;
-  first_name?: Maybe<Scalars['String']>;
-  last_name?: Maybe<Scalars['String']>;
   notes?: Maybe<Scalars['String']>;
-  phone?: Maybe<Scalars['String']>;
+  phone?: Maybe<Scalars['PhoneNumber']>;
   postal_code?: Maybe<Scalars['String']>;
   state?: Maybe<Scalars['String']>;
   street_address?: Maybe<Scalars['String']>;
@@ -118,23 +181,60 @@ export interface Contact {
 }
 
 
+
+
+
+
 export interface Document {
   __typename?: 'Document';
   id: Scalars['DocumentID'];
+  date_completed?: Maybe<Scalars['Date']>;
+  date_created: Scalars['Date'];
+  date_declined?: Maybe<Scalars['Date']>;
+  date_expiration?: Maybe<Scalars['Date']>;
+  date_modified: Scalars['Date'];
+  date_sent?: Maybe<Scalars['Date']>;
+  date_status_changed: Scalars['Date'];
+  has_ordering: Scalars['Boolean'];
   name: Scalars['String'];
+  owner: User;
+  removed: Scalars['Boolean'];
+  renewal?: Maybe<DocumentRenewal>;
   status: DocumentStatus;
+  total: DocumentTotal;
   type: DocumentType;
   version: Scalars['Int'];
   organization: Scalars['OrganizationID'];
   workspace: Scalars['WorkspaceID'];
-  owner: User;
   folder: Folder;
-  removed: Scalars['Boolean'];
   revision_number: Scalars['Int'];
   sample: Scalars['Boolean'];
   silent: Scalars['Boolean'];
+  recipients: Array<FullDocumentRecipient>;
 }
 
+
+
+export interface User {
+  __typename?: 'User';
+  id: Scalars['UserID'];
+  avatar?: Maybe<Scalars['ImageUrl']>;
+  email: Scalars['Email'];
+  first_name: Scalars['String'];
+  iid: Scalars['Int'];
+  /** Checks whether that user has no active workspace */
+  is_suspended: Scalars['Boolean'];
+  last_name: Scalars['String'];
+  phone_number: Scalars['String'];
+  /** (example: "login") */
+  signup_source: Scalars['String'];
+}
+
+export interface DocumentRenewal {
+  __typename?: 'DocumentRenewal';
+  enabled: Scalars['Boolean'];
+  renewal_date?: Maybe<Scalars['Date']>;
+}
 
 export enum DocumentStatus {
   DRAFT = 0,
@@ -151,6 +251,13 @@ export enum DocumentStatus {
   UNDEFINED = -1
 }
 
+export interface DocumentTotal {
+  __typename?: 'DocumentTotal';
+  type: Scalars['Int'];
+  value?: Maybe<Scalars['DocumentTotalValueJSON']>;
+}
+
+
 export enum DocumentType {
   DOCUMENT = 0,
   TEMPLATE = 1,
@@ -160,22 +267,6 @@ export enum DocumentType {
 }
 
 
-
-export interface User {
-  __typename?: 'User';
-  id: Scalars['UserID'];
-  email: Scalars['String'];
-  first_name: Scalars['String'];
-  last_name: Scalars['String'];
-  phone_number: Scalars['String'];
-  /** Url to profile image (example: 'https://pd-staging-media.s3.us-west-2.amazonaws.com:443/users/G7joiw7DcRQ46yhM53uq2Q/avatar-200x200.jpg') */
-  avatar?: Maybe<Scalars['String']>;
-  iid: Scalars['Int'];
-  /** Checks whether that user has no active workspace */
-  is_suspended: Scalars['Boolean'];
-  /** (example: "login") */
-  signup_source: Scalars['String'];
-}
 
 export interface Folder {
   __typename?: 'Folder';
@@ -206,6 +297,42 @@ export interface Folder {
 }
 
 
+export interface FullDocumentRecipient {
+  __typename?: 'FullDocumentRecipient';
+  id: Scalars['ContactID'];
+  avatar?: Maybe<Scalars['ImageUrl']>;
+  email: Scalars['Email'];
+  first_name?: Maybe<Scalars['String']>;
+  last_name?: Maybe<Scalars['String']>;
+  type: RecipientType;
+  is_done: Scalars['Boolean'];
+  document: Scalars['DocumentID'];
+  date_created: Scalars['Date'];
+  can_pay: Scalars['Boolean'];
+  contact: Contact;
+  fields: Array<Scalars['FieldID']>;
+  language: Languages;
+  authentication?: Maybe<Scalars['FIXME']>;
+  features?: Maybe<Scalars['FIXME']>;
+  ordering?: Maybe<Scalars['FIXME']>;
+}
+
+export enum RecipientType {
+  SIGNER = 1,
+  CC = 2
+}
+
+
+export enum Languages {
+  EN = 'en-US',
+  FR = 'fr-FR',
+  IT = 'it-IT',
+  ES = 'es-ES',
+  NL = 'nl-NL',
+  DE = 'de-DE',
+  PT = 'pt-BR'
+}
+
 
 export interface DocumentInfo {
   __typename?: 'DocumentInfo';
@@ -214,6 +341,7 @@ export interface DocumentInfo {
   type: DocumentType;
   version: Scalars['Int'];
   owner: DocumentInfoOwner;
+  redlining?: Maybe<Scalars['FIXME']>;
 }
 
 export interface DocumentInfoOwner {
@@ -221,46 +349,71 @@ export interface DocumentInfoOwner {
   id?: Maybe<Scalars['UserID']>;
 }
 
+export interface ContactDocument {
+  __typename?: 'ContactDocument';
+  id: Scalars['DocumentID'];
+  date_completed?: Maybe<Scalars['Date']>;
+  date_created: Scalars['Date'];
+  date_declined?: Maybe<Scalars['Date']>;
+  date_expiration?: Maybe<Scalars['Date']>;
+  date_modified: Scalars['Date'];
+  date_sent?: Maybe<Scalars['Date']>;
+  date_status_changed: Scalars['Date'];
+  has_ordering: Scalars['Boolean'];
+  has_payment: Scalars['Boolean'];
+  name: Scalars['String'];
+  owner: User;
+  removed: Scalars['Boolean'];
+  renewal?: Maybe<DocumentRenewal>;
+  status: DocumentStatus;
+  total: DocumentTotal;
+  type: DocumentType;
+  version: Scalars['Int'];
+  approval_execution?: Maybe<Scalars['FIXME']>;
+  autonumbering_sequence_name?: Maybe<Scalars['FIXME']>;
+  recipients: Array<Recipient>;
+  tags?: Maybe<Scalars['FIXME']>;
+}
+
+export interface Recipient {
+  __typename?: 'Recipient';
+  id: Scalars['ContactID'];
+  avatar?: Maybe<Scalars['ImageUrl']>;
+  email: Scalars['Email'];
+  first_name?: Maybe<Scalars['String']>;
+  last_name?: Maybe<Scalars['String']>;
+  type: RecipientType;
+  is_done: Scalars['Boolean'];
+}
+
 export interface Profile {
   __typename?: 'Profile';
-  id: Scalars['String'];
-  iid: Scalars['Int'];
-  signature?: Maybe<Signature>;
-  /** Url to profile image (example: 'https://pd-staging-media.s3.us-west-2.amazonaws.com:443/users/G7joiw7DcRQ46yhM53uq2Q/avatar-200x200.jpg') */
-  avatar?: Maybe<Scalars['String']>;
-  /** e-mail address 'test@example.com' */
-  email: Scalars['String'];
-  /** Checks whether that user has no active workspace */
-  is_suspended: Scalars['Boolean'];
-  first_name: Scalars['String'];
-  last_name: Scalars['String'];
-  /** Any phone number no restrictions (example: "0", "14845101364") */
-  phone_number: Scalars['String'];
-  /** (example: "login") */
-  signup_source: Scalars['String'];
+  id: Scalars['UserID'];
+  actor: Scalars['ContactID'];
+  avatar?: Maybe<Scalars['ImageUrl']>;
   /** @deprecated Always will be returned 'null' (More info: https://pandadoc.atlassian.net/browse/PD-7736) */
   company_name?: Maybe<Scalars['String']>;
   /** @deprecated Always will be returned 'null' (More info: https://pandadoc.atlassian.net/browse/PD-7736) */
   company_size?: Maybe<CompanySize>;
-  is_organization_owner: Scalars['Boolean'];
-  is_organization_admin: Scalars['Boolean'];
-  email_verified: Scalars['Boolean'];
-  date_registered: Scalars['Date'];
   date_joined: Scalars['Date'];
-  org_date_created?: Maybe<Scalars['Date']>;
+  date_registered: Scalars['Date'];
+  email: Scalars['Email'];
+  email_verified: Scalars['Boolean'];
+  first_name: Scalars['String'];
+  iid: Scalars['Int'];
+  is_organization_admin: Scalars['Boolean'];
+  is_organization_owner: Scalars['Boolean'];
+  /** Checks whether that user has no active workspace */
+  is_suspended: Scalars['Boolean'];
+  last_name: Scalars['String'];
   /** (example: "Full") */
   license: Scalars['String'];
+  org_date_created?: Maybe<Scalars['Date']>;
+  phone_number: Scalars['PhoneNumber'];
+  signature?: Maybe<Signature>;
+  /** (example: "login") */
+  signup_source: Scalars['String'];
   workspace: Scalars['WorkspaceID'];
-  /** TODO: Not sure that is UserID */
-  actor: Scalars['UserID'];
-}
-
-export interface Signature {
-  __typename?: 'Signature';
-  /** Encode image data */
-  data: Scalars['String'];
-  /** Image format (example: "image/png;base64") */
-  dataFormat: Scalars['String'];
 }
 
 export enum CompanySize {
@@ -271,6 +424,14 @@ export enum CompanySize {
   FROM_201_TO_500 = '201-500',
   FROM_501_TO_1000 = '501-1000',
   FROM_1001_AND_MORE = '1001+'
+}
+
+export interface Signature {
+  __typename?: 'Signature';
+  /** Encode image data */
+  data: Scalars['String'];
+  /** Image format (example: "image/png;base64") */
+  dataFormat: Scalars['String'];
 }
 
 /** Request URL: https://api.pandadoc.com/properties */
@@ -344,24 +505,107 @@ export enum CrmTypes {
   DO_NOT_HAVE_CRM = 'Don\'t have a CRM'
 }
 
+
 export interface Workspace {
   __typename?: 'Workspace';
   id: Scalars['WorkspaceID'];
-  organization: Scalars['OrganizationID'];
-  owner: User;
+  active_members_count: Scalars['Int'];
+  branding: WorkspaceBranding;
   date_created: Scalars['Date'];
   date_updated?: Maybe<Scalars['Date']>;
   editor_mode: EditorMode;
-  active_members_count: Scalars['Int'];
+  folders: WorkspaceFolders;
   invited_members_count: Scalars['Int'];
-  new_editor_available: Scalars['Boolean'];
-  name: Scalars['String'];
-  features: Array<Scalars['Int']>;
   members: Array<Scalars['UserID']>;
+  name: Scalars['String'];
+  new_editor_available: Scalars['Boolean'];
+  organization: Scalars['OrganizationID'];
+  owner: User;
+  settings: WorkspaceSettings;
+  features?: Maybe<Scalars['FIXME']>;
+  subscription?: Maybe<Scalars['FIXME']>;
 }
+
+export interface WorkspaceBranding {
+  __typename?: 'WorkspaceBranding';
+  button_background_color: Scalars['CssColor'];
+  button_text_color: Scalars['CssColor'];
+  custom_branding: Scalars['Boolean'];
+  email_footer_text: Scalars['String'];
+  email_subject_whitelabeled: Scalars['Boolean'];
+  icon?: Maybe<Scalars['ImageUrl']>;
+  icon_src: Scalars['ImageUrl'];
+  main_logo: Scalars['ImageUrl'];
+}
+
 
 export enum EditorMode {
   EV1 = 'EV1',
   EV2 = 'EV2',
   EV1_EV2 = 'EV1_EV2'
+}
+
+export interface WorkspaceFolders {
+  __typename?: 'WorkspaceFolders';
+  documents: Scalars['FolderID'];
+  library: Scalars['FolderID'];
+  templates: Scalars['FolderID'];
+  trash: Scalars['FolderID'];
+}
+
+export interface WorkspaceSettings {
+  __typename?: 'WorkspaceSettings';
+  allow_join_by_domain: Scalars['Boolean'];
+  allowed_clickable_links: Scalars['Boolean'];
+  allowed_initials_draw: Scalars['Boolean'];
+  allowed_initials_type: Scalars['Boolean'];
+  allowed_signature_draw: Scalars['Boolean'];
+  allowed_signature_type: Scalars['Boolean'];
+  allowed_signature_upload: Scalars['Boolean'];
+  currency_formats?: Maybe<Scalars['CurrencyFormatsJSON']>;
+  date_created: Scalars['Date'];
+  date_formats: Scalars['DateFormatsJSON'];
+  date_updated: Scalars['Date'];
+  default_currency: Scalars['Currencies'];
+  default_date_format: DateFormats;
+  default_theme: Scalars['ThemeID'];
+  enable_signer_completion_dialog: Scalars['Boolean'];
+  expiration: WorkspaceExpiration;
+  language_ev1: Languages;
+  language_ev2: Languages;
+  reminders?: Maybe<WorkspaceReminders>;
+  send_signed_pdf: Scalars['Boolean'];
+}
+
+
+
+
+export enum DateFormats {
+  YYYY_MM_DD = 'YYYY-MM-DD',
+  MM_DD_YYYY = 'MM-DD-YYYY',
+  DD_MM_YYYY = 'DD-MM-YYYY',
+  YYYYMMDD = 'YYYY / MM / DD',
+  MMDDYYYY = 'MM / DD / YYYY',
+  DDMMYYYY = 'DD / MM / YYYY',
+  YYYY__MM__DD = 'YYYY.MM.DD',
+  MM__DD__YYYY = 'MM.DD.YYYY',
+  DD__MM__YYYY = 'DD.MM.YYYY',
+  MMM_DD_YYYY = 'MMM DD, YYYY',
+  DD_MMM_YYYY = 'DD MMM YYYY'
+}
+
+
+export interface WorkspaceExpiration {
+  __typename?: 'WorkspaceExpiration';
+  expires_at: Scalars['Int'];
+  notification_enabled: Scalars['Boolean'];
+  notification_interval: Scalars['Int'];
+}
+
+export interface WorkspaceReminders {
+  __typename?: 'WorkspaceReminders';
+  first_enabled: Scalars['Int'];
+  first_interval?: Maybe<Scalars['Int']>;
+  repeat_enabled: Scalars['Int'];
+  repeat_interval?: Maybe<Scalars['Int']>;
 }

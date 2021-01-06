@@ -6,7 +6,7 @@ import {
 import { AxiosInstance } from "axios";
 
 export interface FieldConfig<
-  TArgs extends Record<string, any> = Record<string, any>,
+  TArgs extends Record<string, any> = never,
   TContext = { axios: AxiosInstance },
   TSource = any
 > {

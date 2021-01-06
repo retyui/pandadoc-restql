@@ -2,7 +2,6 @@ import { schemaComposer } from "graphql-compose";
 import { FolderID, WorkspaceID } from "../types/Scalars";
 import { UserTC } from "./UserTD";
 import { getFolderTreeById } from "../../verdor/folder";
-import { GraphQLResolveInfo } from "graphql/type/definition";
 
 export const FolderTC = schemaComposer.createObjectTC({
   name: "Folder",

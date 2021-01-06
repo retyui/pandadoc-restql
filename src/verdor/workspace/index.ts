@@ -1,12 +1,22 @@
 import { AxiosInstance } from "axios";
+import { createParamsValidator, InferParamsType } from "../params";
+import * as yup from "yup";
 
-export const getWorkspaceById = (
+const validateParams = createParamsValidator(
+  yup.object().shape({
+    organizationId: yup.string().required(),
+    workspaceId: yup.string().required(),
+  })
+);
+
+export async function getWorkspaceById(
   axios: AxiosInstance,
-  {
-    workspaceId,
-    organizationId,
-  }: { workspaceId: string; organizationId: string }
-) =>
-  axios
-    .get(`/org/${organizationId}/ws/${workspaceId}/`)
-    .then((res) => res?.data);
+  params: InferParamsType<typeof validateParams>
+) {
+  const { organizationId, workspaceId } = await validateParams(params);
+  const { data: workspace } = await axios.get(
+    `/org/${organizationId}/ws/${workspaceId}/`
+  );
+
+  return workspace;
+}

@@ -1,6 +1,19 @@
 import { AxiosInstance } from "axios";
+import { createParamsValidator, InferParamsType } from "../params";
+import * as yup from "yup";
 
-export const getContactById = (
+const validateParams = createParamsValidator(
+  yup.object().shape({
+    contactId: yup.string().required(),
+  })
+);
+
+export async function getContactById(
   axios: AxiosInstance,
-  { contactId }: { contactId: string }
-) => axios.get(`/contacts/${contactId}`).then((res) => res?.data);
+  params: InferParamsType<typeof validateParams>
+) {
+  const { contactId } = await validateParams(params);
+  const { data: contact } = await axios.get(`/contacts/${contactId}`);
+
+  return contact;
+}
