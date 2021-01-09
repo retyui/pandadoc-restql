@@ -12,6 +12,9 @@ export default {
 Request URL: https://api.pandadoc.com/folders/<folderId>/
 `,
   resolve: (_, args, { axios }) => getFolderById(axios, { folderId: args.id }),
+  extensions: {
+    complexity: ({ args, childComplexity }) => childComplexity * 10,
+  },
 } as FieldConfig<{
   id: string;
 }>;

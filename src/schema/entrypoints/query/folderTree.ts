@@ -8,6 +8,9 @@ export default {
   args: {
     id: FolderID.NonNull,
   },
+  extensions: {
+    complexity: ({ args, childComplexity }) => childComplexity * 10,
+  },
   resolve: (_, args, context, info) =>
     getFolderTreeById(context.axios, { folderId: args.id }),
 

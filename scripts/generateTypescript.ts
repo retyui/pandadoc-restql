@@ -14,6 +14,10 @@ const config = {
     {
       typescript: {
         scalars: {
+          AuditTrailID: "string",
+          RevisionID: "string",
+          UUID: "string",
+          RecipientID: "string",
           ContactID: "string",
           DocumentID: "string",
           FieldID: "string",
@@ -21,6 +25,7 @@ const config = {
           OrganizationID: "string",
           UserID: "string",
           WorkspaceID: "string",
+          FixMe: "never",
           CssColor: "string",
           Currencies: CurrenciesData,
           Email: "string",
@@ -42,6 +47,8 @@ const config = {
           DocumentTotalValueJSON: `Record<Scalars["Currencies"], string>`,
         },
         declarationKind: "interface",
+        skipTypename: true,
+        useTypeImports: true,
         namingConvention: {
           typeNames: "pascal-case#pascalCase",
           enumValues: "upper-case#upperCase",

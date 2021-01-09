@@ -4,6 +4,9 @@ import { express as voyagerMiddleware } from "graphql-voyager/middleware";
 
 import { createInstance } from "./verdor/axios";
 import { schema } from "./schema";
+import { customTracingPlugin } from "./plugins/customTracingPlugin";
+import { durationPlugin } from "./plugins/durationPlugin";
+import { queryCostPlugin } from "./plugins/queryCostPlugin";
 
 const PORT = 4000;
 const app = express();
@@ -16,23 +19,31 @@ const apolloServer = new ApolloServer({
 
     return context;
   },
-  // tracing: true,
-  // plugins: [
-  //   process.env.DISABLE_QUERY_COST
-  //     ? null
-  //     : queryCostPlugin({
-  //         schema,
-  //         maxComplexity: process.env.MAX_QUERY_COMPLEXITY || 100000,
-  //       }),
-  //   process.env.DISABLE_TRACING ? null : durationPlugin(),
-  //   process.env.DISABLE_TRACING ? null : customTracingPlugin(),
-  // ].filter(Boolean) as any,
+  tracing: true,
+  plugins: [
+    process.env.DISABLE_QUERY_COST
+      ? null
+      : queryCostPlugin({
+          schema,
+          maxComplexity: process.env.MAX_QUERY_COMPLEXITY || 100000,
+        }),
+    process.env.DISABLE_TRACING ? null : durationPlugin(),
+    process.env.DISABLE_TRACING ? null : customTracingPlugin(),
+  ].filter(Boolean) as any,
 });
 
-app.use("/voyager", voyagerMiddleware({ endpointUrl: "/" }));
+const GRAPHQL_ENDPOINT = "/graphql";
+
+app.use(
+  "/voyager",
+  voyagerMiddleware({
+    endpointUrl: GRAPHQL_ENDPOINT,
+  })
+);
+
 app.use(
   apolloServer.getMiddleware({
-    path: "/graphql",
+    path: GRAPHQL_ENDPOINT,
     disableHealthCheck: true,
     cors: {
       credentials: true,

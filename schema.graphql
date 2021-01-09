@@ -1,6 +1,16 @@
 # for PandaDoc with ❤️
 type Query {
   #
+  # Request URL: https://api.pandadoc.com/documents/<documentId>/audit_trail
+  #
+  auditTrail(documentId: DocumentID!): [DocumentAuditTrail!]
+
+  #
+  # Request URL: https://api.pandadoc.com/org/<organizationId>/ws/<workspaceId>/documents/<documentId>/comments/list
+  #
+  comments(organizationId: OrganizationID!, workspaceId: WorkspaceID!, documentId: DocumentID!, sessionUuid: UUID!, order: CommentOrder, status: CommentStatus, placementTypeDocument: Boolean): [Comment!]
+
+  #
   # Request URL: https://api.pandadoc.com/contacts/<contactId>
   #
   contact(id: UserID!): Contact
@@ -14,6 +24,11 @@ type Query {
   # Request URL: https://api.pandadoc.com/org/<organizationId>/ws/<workspaceId>/documents/<documentId>/info
   #
   documentInfo(organizationId: OrganizationID!, workspaceId: WorkspaceID!, documentId: DocumentID!): DocumentInfo
+
+  #
+  # Request URL: https://api.pandadoc.com/contacts/<ContactId>/documents
+  #
+  documentsByContactsId(contactId: UserID!, page: Int, count: Int, statusNe: DocumentStatus): [ContactDocument!]
 
   #
   # Request URL: https://api.pandadoc.com/folders/<folderId>/
@@ -38,6 +53,11 @@ type Query {
   folderTree(id: FolderID!): [Folder!]
 
   #
+  # Request URL: https://api.pandadoc.com/documents/<documentId>/actions
+  #
+  history(documentId: DocumentID!, order: DocumentHistoryOrder, page: Int, count: Int): [DocumentHistoryAction!]
+
+  #
   # Request URL: https://api.pandadoc.com/profile
   #
   profile: Profile
@@ -48,51 +68,228 @@ type Query {
   properties: Properties
 
   #
+  # Request URL: https://api.pandadoc.com/org/<organizationId>/ws/<workspaceId>/documents/<documentId>/recipients/sharing-links
+  #
+  sharingLinks(organizationId: OrganizationID!, workspaceId: WorkspaceID!, documentId: DocumentID!): [SharingLink!]
+
+  #
+  # Request URL: https://api.pandadoc.com/users/treatments
+  #
+  treatments(features: [String!]!): TreatmentsJSON
+
+  #
   # Request URL: https://api.pandadoc.com/org/<organizationId>/ws/<workspaceId>/
   #
   workspace(workspaceId: WorkspaceID!, organizationId: OrganizationID!): Workspace
 }
 
-type Contact {
-  id: UserID!
-  email: String!
-  is_internal: Boolean!
-  removed: Boolean!
+type DocumentAuditTrail {
+  id: AuditTrailID!
+  action: AuditTrailActionType!
+  data: DocumentAuditTrailDataJSON!
+  date_created: Date!
+  ip_address: String
+  reason: String
+  revision: RevisionID!
+  user: User!
+  workspace: WorkspaceID
+}
 
-  # Url to profile image (example: 'https://pd-staging-media.s3.us-west-2.amazonaws.com:443/users/G7joiw7DcRQ46yhM53uq2Q/avatar-200x200.jpg')
-  avatar: String
+scalar AuditTrailID
+
+# http://gitlab.pandadoc.com/product/gwpy-core/-/blob/master/pandadoc/apps/audit/constants.py
+enum AuditTrailActionType {
+  ACTION_DOCUMENT
+  ACTION_REVISION
+  ACTION_APPROVE_REQUEST
+  ACTION_APPROVED
+  ACTION_REJECTED
+  ACTION_SENT
+  ACTION_ALL_COMPLETED
+  ACTION_VIEWED
+  ACTION_COMPLETED
+  ACTION_WAITING_PAY
+  ACTION_PAID
+  ACTION_FORWARDED
+  ACTION_EXPIRED
+  ACTION_PAYMENT_BANK_ACCOUNT_SUBMITTED
+  ACTION_PAYMENT_BANK_ACCOUNT_VERIFIED
+  ACTION_PAYMENT_SUBMITTED
+  ACTION_PAYMENT_FAILED
+  ACTION_COMPLETED_MANUALLY
+  ACTION_EXPIRED_MANUALLY
+  ACTION_PAID_MANUALLY
+  ACTION_APPROVAL_DELETED
+  ACTION_APPROVAL_FORCED
+  ACTION_REASSIGNED
+  ACTION_RECIPIENT_EDITED
+  ACTION_RECIPIENT_ADDED
+  ACTION_RECIPIENT_DELETED
+  ACTION_DECLINED_MANUALLY
+  ACTION_APPROVAL_STEP_SKIPPED
+
+  # # BECAUSE FRONT END HAS ONE LIST CONSTANTS FOR AUDIT TRAIL AND DOCUMENT ACTIONS
+  ACTION_DECLINED
+}
+
+# Can include meta information
+scalar DocumentAuditTrailDataJSON
+
+scalar Date
+
+scalar RevisionID
+
+type User {
+  id: UserID!
+  avatar: ImageUrl
+  email: Email!
+  first_name: String!
+  iid: Int!
+
+  # Checks whether that user has no active workspace
+  is_suspended: Boolean!
+  last_name: String!
+  phone_number: String
+
+  # (example: "login")
+  signup_source: String
+}
+
+scalar UserID
+
+# Url to image (example: 'https://s3.amazonaws.com/test.jpg')
+scalar ImageUrl
+
+# e-mail address (exmaple: 'test@example.com')
+scalar Email
+
+scalar WorkspaceID
+
+scalar DocumentID
+
+# http://gitlab.pandadoc.com/product/gwpy-core/-/blob/master/pandadoc/apps/documents/comments/serializers.py#L201
+type Comment {
+  uuid: UUID!
+  access: CommentAccessType!
+  anchor_uuid: UUID
+  date_created: Date!
+  date_updated: Date
+  document_id: DocumentID!
+  mentions: FixMe
+  placement_type: CommentPlacementType!
+  replies: [CommentReply!]
+  status: CommentStatus!
+  status_updated_by: CommentUser
+  text: String!
+  user: CommentUser!
+}
+
+scalar UUID
+
+# http://gitlab.pandadoc.com/leonid.novikov/gwpy-core/-/blob/master/pandadoc/apps/documents/comments/enums.py#L7
+enum CommentAccessType {
+  PUBLIC
+  INTERNAL
+}
+
+# I DO NOT KNOW WHAT TYPE HERE SHOULD BE ((
+scalar FixMe
+
+# http://gitlab.pandadoc.com/leonid.novikov/gwpy-core/-/blob/master/pandadoc/apps/documents/comments/enums.py#L52
+enum CommentPlacementType {
+  DOCUMENT
+  BLOCK
+  INLINE_COMMENT
+}
+
+type CommentReply {
+  uuid: UUID!
+  date_created: Date!
+  date_updated: Date
+  mentions: FixMe
+  text: String!
+  user: CommentUser!
+}
+
+type CommentUser {
+  id: UserID!
+  email: Email!
+  avatar: ImageUrl
+  first_name: String
+  last_name: String
+}
+
+# http://gitlab.pandadoc.com/leonid.novikov/gwpy-core/-/blob/master/pandadoc/apps/documents/comments/enums.py#L45
+enum CommentStatus {
+  RESOLVED
+  ACTIVE
+}
+
+scalar OrganizationID
+
+# http://gitlab.pandadoc.com/leonid.novikov/gwpy-core/-/blob/master/pandadoc/apps/documents/comments/enums.py#L59
+enum CommentOrder {
+  DATE_CREATED
+  DATE_CREATED_DESC
+  DATE_UPDATED
+  DATE_UPDATED_DESC
+}
+
+type Contact {
+  id: ContactID!
+  avatar: ImageUrl
   city: String
   company: String
   country: String
+  email: Email!
   first_name: String
   last_name: String
+  is_internal: Boolean!
   notes: String
-  phone: String
+  phone: PhoneNumber
   postal_code: String
+  removed: Boolean!
   state: String
   street_address: String
   title: String
 }
 
-scalar UserID
+scalar ContactID
+
+# Any phone number no restrictions (example: "0", "14845101364")
+scalar PhoneNumber
 
 type Document {
   id: DocumentID!
+  date_completed: Date
+  date_created: Date!
+  date_declined: Date
+  date_expiration: Date
+  date_modified: Date!
+  date_sent: Date
+  date_status_changed: Date!
+  has_ordering: Boolean!
   name: String!
+  owner: User!
+  removed: Boolean!
+  renewal: DocumentRenewal
   status: DocumentStatus!
+  total: DocumentTotal!
   type: DocumentType!
   version: Int!
   organization: OrganizationID!
   workspace: WorkspaceID!
-  owner: User!
   folder: Folder!
-  removed: Boolean!
   revision_number: Int!
   sample: Boolean!
   silent: Boolean!
+  recipients: [FullDocumentRecipient!]!
 }
 
-scalar DocumentID
+type DocumentRenewal {
+  enabled: Boolean!
+  renewal_date: Date
+}
 
 enum DocumentStatus {
   DRAFT
@@ -109,34 +306,20 @@ enum DocumentStatus {
   UNDEFINED
 }
 
+type DocumentTotal {
+  type: Int!
+  value: DocumentTotalValueJSON
+}
+
+# Record<Currencies, string>  (example  { USD: "0" })
+scalar DocumentTotalValueJSON
+
 enum DocumentType {
   DOCUMENT
   TEMPLATE
   EDITABLE_DOCUMENT
   EDITABLE_TEMPLATE
   LIBRARY_ITEM
-}
-
-scalar OrganizationID
-
-scalar WorkspaceID
-
-type User {
-  id: UserID!
-  email: String!
-  first_name: String!
-  last_name: String!
-  phone_number: String!
-
-  # Url to profile image (example: 'https://pd-staging-media.s3.us-west-2.amazonaws.com:443/users/G7joiw7DcRQ46yhM53uq2Q/avatar-200x200.jpg')
-  avatar: String
-  iid: Int!
-
-  # Checks whether that user has no active workspace
-  is_suspended: Boolean!
-
-  # (example: "login")
-  signup_source: String!
 }
 
 type Folder {
@@ -158,18 +341,58 @@ type Folder {
   #
   # [{id:'root_id'}, {id:'folder2_id'}, {id:'folder3_id'}]
   #
-  #
   # root
   # ├── folder1
   # ├── folder2
   # │   ├── folder3
+  #
+  #
   #
   tree: [Folder!]!
 }
 
 scalar FolderID
 
-scalar Date
+type FullDocumentRecipient {
+  id: RecipientID!
+  avatar: ImageUrl
+  can_pay: Boolean!
+  contact: Contact!
+  date_created: Date!
+  document: DocumentID!
+  email: Email
+  fields: [FieldID!]!
+  first_name: String
+  is_done: Boolean!
+  language: Languages!
+  last_name: String
+  type: RecipientType!
+  authentication: FixMe
+  features: FixMe
+  ordering: FixMe
+}
+
+scalar RecipientID
+
+scalar FieldID
+
+enum Languages {
+  EN
+  FR
+  IT
+  ES
+  NL
+  DE
+  PT
+  PL
+  SK
+}
+
+# http://gitlab.pandadoc.com/product/gwpy-core/-/blob/master/pandadoc/apps/contacts/enums.py#L17
+enum RecipientType {
+  SIGNER
+  CC
+}
 
 type DocumentInfo {
   id: DocumentID!
@@ -177,56 +400,155 @@ type DocumentInfo {
   type: DocumentType!
   version: Int!
   owner: DocumentInfoOwner!
+  redlining: FixMe
 }
 
 type DocumentInfoOwner {
   id: UserID
 }
 
+type ContactDocument {
+  id: DocumentID!
+  date_completed: Date
+  date_created: Date!
+  date_declined: Date
+  date_expiration: Date
+  date_modified: Date!
+  date_sent: Date
+  date_status_changed: Date!
+  has_ordering: Boolean!
+  has_payment: Boolean!
+  name: String!
+  owner: User!
+  removed: Boolean!
+  renewal: DocumentRenewal
+  status: DocumentStatus!
+  total: DocumentTotal!
+  type: DocumentType!
+  version: Int!
+  approval_execution: FixMe
+  autonumbering_sequence_name: FixMe
+  recipients: [Recipient!]!
+  tags: FixMe
+}
+
+type Recipient {
+  id: RecipientID!
+  avatar: ImageUrl
+  email: Email
+  first_name: String
+  is_done: Boolean!
+  last_name: String
+  type: RecipientType!
+}
+
+type DocumentHistoryAction {
+  id: Int!
+  actor: User!
+  data: DocumentHistoryDataJSON
+  date_created: Date!
+  document: HistoryActionDocument!
+  type: DocumentActionType!
+}
+
+#
+#   Can include meta information for example:   
+#  1) SENT {"delivery_type": "email"}; 
+#  2) RECIPIENT_DELETED {recipient: {type: 2, email: "...", first_name: "...", last_name: "...",}}
+#   
+scalar DocumentHistoryDataJSON
+
+type HistoryActionDocument {
+  id: DocumentID!
+  name: String!
+  type: DocumentType!
+  autonumbering_sequence_name: FixMe
+}
+
+# http://gitlab.pandadoc.com/product/gwpy-core/-/blob/master/pandadoc/apps/annotations/constants.py
+enum DocumentActionType {
+  CREATED
+  EDITED
+  SENT
+  DELETED
+  VIEWED
+  COMPLETED
+  COMMENTED
+  RECEIVED
+  REVISION
+  ALL_COMPLETED
+
+  # embedded template
+  SIGNED_AND_COMPLETED
+  DUPLICATED
+  INVOICE_SENT
+  FORWARDED
+  PAYMENT_WAITING
+  PAID
+  PAYMENT_FAILED
+  UPDATED_EXPIRATION_AFTER_SENT
+  EXPIRATION_NOTIFICATIONS_SENT
+  MANUAL_REMINDER_FOR_COMPLETE_SENT
+  AUTO_REMINDERS_FOR_COMPLETE_SENT
+  MANUAL_REMINDER_FOR_PAY_SENT
+  PAYMENT_BANK_ACCOUNT_SUBMITTED
+  PAYMENT_BANK_ACCOUNT_VERIFICATION_FAILED
+  PAYMENT_BANK_ACCOUNT_VERIFIED
+  PAYMENT_SUBMITTED
+  RENEWAL_REMINDER_SENT
+  EMAIL_DELIVERY_FAILED
+  EMAIL_DELIVERED
+  EMAIL_OPENED
+  APPROVAL_APPROVAL_REQUESTED
+  APPROVAL_APPROVE_RECEIVED
+  APPROVAL_REJECTION_RECEIVED
+  COMPLETED_MANUALLY
+  EXPIRED_MANUALLY
+  PAID_MANUALLY
+  APPROVAL_APPROVAL_DELETED
+  APPROVAL_APPROVAL_FORCED
+  REASSIGNED
+  RECIPIENT_EDITED
+  RECIPIENT_ADDED
+  RECIPIENT_DELETED
+  DECLINED_MANUALLY
+  APPROVAL_STEP_SKIPPED
+  DECLINED
+}
+
+enum DocumentHistoryOrder {
+  DATE_CREATED
+  DATE_CREATED_DESC
+}
+
 type Profile {
-  id: String!
+  id: UserID!
+  actor: ContactID!
+  avatar: ImageUrl
+  company_name: String @deprecated(reason: "Always will be returned 'null' (More info: https://pandadoc.atlassian.net/browse/PD-7736)")
+  company_size: CompanySize @deprecated(reason: "Always will be returned 'null' (More info: https://pandadoc.atlassian.net/browse/PD-7736)")
+  date_joined: Date!
+  date_registered: Date!
+  email: Email!
+  email_verified: Boolean!
+  first_name: String!
   iid: Int!
-  signature: Signature
-
-  # Url to profile image (example: 'https://pd-staging-media.s3.us-west-2.amazonaws.com:443/users/G7joiw7DcRQ46yhM53uq2Q/avatar-200x200.jpg')
-  avatar: String
-
-  # e-mail address 'test@example.com'
-  email: String!
+  is_organization_admin: Boolean!
+  is_organization_owner: Boolean!
 
   # Checks whether that user has no active workspace
   is_suspended: Boolean!
-  first_name: String!
   last_name: String!
-
-  # Any phone number no restrictions (example: "0", "14845101364")
-  phone_number: String!
-
-  # (example: "login")
-  signup_source: String!
-  company_name: String @deprecated(reason: "Always will be returned 'null' (More info: https://pandadoc.atlassian.net/browse/PD-7736)")
-  company_size: CompanySize @deprecated(reason: "Always will be returned 'null' (More info: https://pandadoc.atlassian.net/browse/PD-7736)")
-  is_organization_owner: Boolean!
-  is_organization_admin: Boolean!
-  email_verified: Boolean!
-  date_registered: Date!
-  date_joined: Date!
-  org_date_created: Date
 
   # (example: "Full")
   license: String!
+  org_date_created: Date
+  phone_number: PhoneNumber!
+  signature: Signature
+
+  # (example: "login")
+  signup_source: String!
   workspace: WorkspaceID!
-
-  # TODO: Not sure that is UserID
-  actor: UserID!
-}
-
-type Signature {
-  # Encode image data
-  data: String!
-
-  # Image format (example: "image/png;base64")
-  dataFormat: String!
 }
 
 enum CompanySize {
@@ -237,6 +559,14 @@ enum CompanySize {
   FROM_201_TO_500
   FROM_501_TO_1000
   FROM_1001_AND_MORE
+}
+
+type Signature {
+  # Encode image data
+  data: String!
+
+  # Image format (example: "image/png;base64")
+  dataFormat: String!
 }
 
 # Request URL: https://api.pandadoc.com/properties
@@ -286,7 +616,7 @@ type OrganizationProperties {
   company_name: String!
   company_size: CompanySize!
   industry: String!
-  crm: CRMTypes!
+  crm: CrmTypes!
   what_brought_you_to_pandadoc: String!
   phone: String!
   google_analytics_client_id: String!
@@ -298,40 +628,149 @@ type OrganizationProperties {
   hs_analytics_first_url: String!
 }
 
-enum CRMTypes {
-  Salesforce
-  Sugar
-  MicrosoftDynamics
-  FreshsalesCRM
-  Nutshell
-  Base
-  HubSpotCRM
-  Pipedrive
-  Zoho
-  ProsperWorks
-  Insightly
-  Other
-  StillLookingForACRM
-  DoNotNaveACRM
+enum CrmTypes {
+  SALESFORCE
+  SUGAR
+  MICROSOFT_DYNAMICS
+  FRESHSALES_CRM
+  NUTSHELL
+  BASE
+  HUBSPOT_CRM
+  PIPEDRIVE
+  ZOHO
+  PROSPER_WORKS
+  INSIGHTLY
+  OTHER
+  STILL_LOOKING_FOR_CRM
+  DO_NOT_HAVE_CRM
 }
+
+# Retrieve or generate (re-issue) DocumentTokens for document recipients
+type SharingLink {
+  id: RecipientID!
+  link: Url!
+}
+
+# URL (example: 'https://app.pandadoc.com/document/1cd272892f87dc644')
+scalar Url
+
+scalar TreatmentsJSON
 
 type Workspace {
   id: WorkspaceID!
-  organization: OrganizationID!
-  owner: User!
+  active_members_count: Int!
+  branding: WorkspaceBranding!
   date_created: Date!
   date_updated: Date
   editor_mode: EditorMode!
-  active_members_count: Int!
+  folders: WorkspaceFolders!
   invited_members_count: Int!
-  new_editor_available: Boolean!
-  name: String!
-  features: [Int!]!
   members: [UserID!]!
+  name: String!
+  new_editor_available: Boolean!
+  organization: OrganizationID!
+  owner: User!
+  settings: WorkspaceSettings!
+  features: FixMe
+  subscription: FixMe
 }
+
+type WorkspaceBranding {
+  button_background_color: CssColor!
+  button_text_color: CssColor!
+  custom_branding: Boolean!
+  email_footer_text: String!
+  email_subject_whitelabeled: Boolean!
+  icon: ImageUrl
+  icon_src: ImageUrl!
+  main_logo: ImageUrl!
+}
+
+# Color value (#ffffff)
+scalar CssColor
 
 enum EditorMode {
   EV1
   EV2
   EV1_EV2
+}
+
+type WorkspaceFolders {
+  documents: FolderID!
+  library: FolderID!
+  templates: FolderID!
+  trash: FolderID!
+}
+
+type WorkspaceSettings {
+  allow_join_by_domain: Boolean!
+  allowed_clickable_links: Boolean!
+  allowed_initials_draw: Boolean!
+  allowed_initials_type: Boolean!
+  allowed_signature_draw: Boolean!
+  allowed_signature_type: Boolean!
+  allowed_signature_upload: Boolean!
+  currency_formats: CurrencyFormatsJSON
+  date_created: Date!
+  date_formats: DateFormatsJSON!
+  date_updated: Date!
+  default_currency: Currencies!
+  default_date_format: DateFormats!
+  default_theme: ThemeID!
+  enable_signer_completion_dialog: Boolean!
+  expiration: WorkspaceExpiration!
+  language_ev1: Languages!
+  language_ev2: Languages!
+  reminders: WorkspaceReminders
+  send_signed_pdf: Boolean!
+}
+
+# interface CurrencyFormatsJSON {
+#   [code: Currencies]: {
+#     code: Currencies;
+#     decimal: string;
+#     format: string;
+#     name: string;
+#     negativeFormat: string;
+#     pluralName: string;
+#     precision: number;
+#     symbol: string;
+#     thousand: string;
+#   };
+# };
+scalar CurrencyFormatsJSON
+
+scalar DateFormatsJSON
+
+# "USD" | "BYN"| "EUR" | ...
+scalar Currencies
+
+# http://gitlab.pandadoc.com/product/gwpy-core/-/blob/master/pandadoc/apps/workspaces/enums.py
+enum DateFormats {
+  YYYY_MM_DD
+  MM_DD_YYYY
+  DD_MM_YYYY
+  YYYYMMDD
+  MMDDYYYY
+  DDMMYYYY
+  YYYY__MM__DD
+  MM__DD__YYYY
+  DD__MM__YYYY
+  MMM_DD_YYYY
+  DD_MMM_YYYY
+}
+
+scalar ThemeID
+
+type WorkspaceExpiration {
+  expires_at: Int!
+  notification_enabled: Boolean!
+  notification_interval: Int!
+}
+
+type WorkspaceReminders {
+  first_enabled: Int!
+  first_interval: Int
+  repeat_enabled: Int!
+  repeat_interval: Int
 }

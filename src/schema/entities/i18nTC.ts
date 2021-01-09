@@ -1,6 +1,6 @@
 import { schemaComposer } from "graphql-compose";
 
-// http://gitlab.pandadoc.com/product/web-app/-/blob/master/packages/appjs-main/scripts/_react/app-constants/Constants.js#L1310
+// curl 'https://api.pandadoc.com/conf/localizations'
 export const LanguagesTC = schemaComposer.createEnumTC({
   name: "Languages",
   values: {
@@ -11,5 +11,7 @@ export const LanguagesTC = schemaComposer.createEnumTC({
     NL: { value: "nl-NL" },
     DE: { value: "de-DE" },
     PT: { value: "pt-BR" },
+    PL: { value: "pl-PL" },
+    SK: { value: "sk-SK" },
   },
 });

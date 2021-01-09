@@ -2,8 +2,6 @@ import { schemaComposer } from "graphql-compose";
 import {
   CssColor,
   Currencies,
-  CurrencyFormatsJSON,
-  DateFormatsJSON,
   FIXME,
   FolderID,
   ImageUrl,
@@ -15,8 +13,30 @@ import {
 import { UserTC } from "./UserTD";
 import { LanguagesTC } from "./i18nTC";
 
+export const CurrencyFormatsJSON = schemaComposer.createScalarTC({
+  name: "CurrencyFormatsJSON",
+  description: `interface CurrencyFormatsJSON {
+  [code: Currencies]: {
+    code: Currencies;
+    decimal: string;
+    format: string;
+    name: string;
+    negativeFormat: string;
+    pluralName: string;
+    precision: number;
+    symbol: string;
+    thousand: string;
+  };
+};`,
+});
+
+export const DateFormatsJSON = schemaComposer.createScalarTC(`
+  scalar DateFormatsJSON
+`);
+
 export const EditorModeTC = schemaComposer.createEnumTC({
   name: "EditorMode",
+  description: `http://gitlab.pandadoc.com/product/gwpy-core/-/blob/master/pandadoc/apps/events/constants.py#L64`,
   values: {
     EV1: { value: "EV1" },
     EV2: { value: "EV2" },
@@ -43,9 +63,9 @@ export const WorkspaceExpirationTC = schemaComposer.createObjectTC({
   },
 });
 
-// http://gitlab.pandadoc.com/product/gwpy-core/-/blob/master/pandadoc/apps/workspaces/enums.py
 export const DateFormatsTC = schemaComposer.createEnumTC({
   name: "DateFormats",
+  description: `http://gitlab.pandadoc.com/product/gwpy-core/-/blob/master/pandadoc/apps/workspaces/enums.py`,
   values: {
     YYYY_MM_DD: { value: "YYYY-MM-DD" },
     MM_DD_YYYY: { value: "MM-DD-YYYY" },

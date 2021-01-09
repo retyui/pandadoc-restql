@@ -73,6 +73,25 @@ export const getDocumentsByContactId = async (
     params: { page, count, status__ne, order_by },
   });
 
-  // @ts-ignore
-  return documents.map((doc) => parseDocument(doc));
+  return documents.map((
+    // @ts-ignore
+    doc
+  ) => parseDocument(doc));
 };
+
+export async function getDocumentSharingLinks(
+  axios: AxiosInstance,
+  params: InferParamsType<typeof validateGetDocParams>
+) {
+  const {
+    organizationId,
+    workspaceId,
+    documentId,
+  } = await validateGetDocParams(params);
+
+  const { data: sharingLinks } = await axios.post(
+    `/org/${organizationId}/ws/${workspaceId}/documents/${documentId}/recipients/sharing-links`
+  );
+
+  return sharingLinks;
+}
